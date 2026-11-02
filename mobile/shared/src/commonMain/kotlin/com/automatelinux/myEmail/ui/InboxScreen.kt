@@ -53,6 +53,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.automatelinux.myEmail.ListState
@@ -251,19 +252,22 @@ private fun ThreadRow(t: ThreadSummary, onClick: () -> Unit) {
         Spacer(Modifier.width(14.dp))
         Column(Modifier.weight(1f)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    t.from, modifier = Modifier.weight(1f, fill = false),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = if (unread) FontWeight.Bold else FontWeight.Medium,
-                    color = if (unread) Ink.Text else Ink.Soft,
-                    maxLines = 1, overflow = TextOverflow.Ellipsis,
-                )
-                if (t.count > 1) {
-                    Spacer(Modifier.width(6.dp))
-                    Text("${t.count}", style = MaterialTheme.typography.labelMedium, color = Ink.Faint,
-                        modifier = Modifier.background(Ink.Hairline.copy(alpha = 0.6f), RoundedCornerShape(6.dp)).padding(horizontal = 5.dp))
+                // Name (+ count) take the free width; time and seal keep a fixed column on the right.
+                Row(Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        t.from, modifier = Modifier.weight(1f, fill = false),
+                        style = MaterialTheme.typography.titleMedium.copy(textDirection = TextDirection.Ltr),
+                        fontWeight = if (unread) FontWeight.Bold else FontWeight.Medium,
+                        color = if (unread) Ink.Text else Ink.Soft,
+                        maxLines = 1, overflow = TextOverflow.Ellipsis,
+                    )
+                    if (t.count > 1) {
+                        Spacer(Modifier.width(6.dp))
+                        Text("${t.count}", style = MaterialTheme.typography.labelMedium, color = Ink.Faint,
+                            modifier = Modifier.background(Ink.Hairline.copy(alpha = 0.6f), RoundedCornerShape(6.dp)).padding(horizontal = 5.dp))
+                    }
                 }
-                Spacer(Modifier.weight(1f).width(8.dp))
+                Spacer(Modifier.width(8.dp))
                 Text(shortTime(t.date), style = MaterialTheme.typography.labelMedium,
                     color = if (unread) Ink.SealDeep else Ink.Faint, fontWeight = if (unread) FontWeight.Bold else FontWeight.Medium)
                 if (unread) { Spacer(Modifier.width(6.dp)); SealDot() }
