@@ -1,0 +1,7 @@
+{
+  "description": "myEmail — a calm, fast Gmail client: the server talks to Gmail, the phone just reads and acts",
+  "icon": "Mail",
+  "sharedLibs": [
+    "android-feedback-lib"
+  ]
+}
