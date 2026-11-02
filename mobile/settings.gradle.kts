@@ -24,3 +24,5 @@ includeBuild("build-logic")
 rootProject.name = "myEmail"
 include(":shared")
 include(":app")
+// Bind-mounted from addnewfeature (packages/android-feedback-lib); dev flavor only.
+include(":feedback-lib")

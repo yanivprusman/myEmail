@@ -45,7 +45,13 @@ data class ListState(
  * confirmation on every one of them is a tax; an undo on the rare mistake isn't.
  */
 @Composable
-fun App(baseUrl: String, token: String, fonts: FontFamily = FontFamily.Default) {
+fun App(
+    baseUrl: String,
+    token: String,
+    fonts: FontFamily = FontFamily.Default,
+    /** Told which view is on screen ("Inbox" / "Conversation") — feedback-lib tags reports with it. */
+    onScreen: (String) -> Unit = {},
+) {
     val api = remember(baseUrl, token) { MailApi(baseUrl, token) }
     val scope = rememberCoroutineScope()
     val snackbar = remember { SnackbarHostState() }
@@ -117,6 +123,7 @@ fun App(baseUrl: String, token: String, fonts: FontFamily = FontFamily.Default) 
     }
 
     LaunchedEffect(Unit) { refresh() }
+    LaunchedEffect(openId) { onScreen(if (openId == null) "Inbox" else "Conversation") }
     PlatformBackHandler(enabled = openId != null) { openId = null }
     StatusBarIcons(light = openId == null)
 
