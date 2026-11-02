@@ -1,34 +1,43 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# myEmail
 
-## Getting Started
+A calm Gmail client for the phone. The **server** (Next.js, dev port 3187, runs on the
+desktop) talks to Gmail; the **phone app** (`mobile/`, KMP/Compose, launcher name
+*MyEmail*) only reads and acts, over WireGuard at `10.7.0.2:3187`.
 
-First, run the development server:
+What it does differently from the Gmail app:
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- **Two views, not one feed.** *People* (Gmail's Primary) and *Everything else*
+  (Promotions/Social/Updates/Forums), each with its own unread count. Bulk mail
+  never competes with a person for your attention.
+- **Text, not remote HTML.** Mail is shown as text: no tracking pixels load on open,
+  nothing reflows, and each Hebrew/English paragraph takes its own direction.
+- **Quoted history folded away** ("On … wrote:", "בתאריך … כתב:").
+- **Swipe = archive, with Undo** instead of a confirmation.
+- The phone never holds a Google credential — only a bearer token for this server.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## API (all require `Authorization: Bearer $MYEMAIL_API_TOKEN`)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+| Route | |
+|---|---|
+| `GET /api/status` | connected address + unread counts per view |
+| `GET /api/inbox?view=people\|other[&pageToken=]` | 25 threads per page |
+| `GET /api/thread/:id` | the conversation as text (does not mark read) |
+| `POST /api/thread/:id` `{action}` | `archive` `inbox` `read` `unread` `trash` `untrash` |
+| `POST /api/thread/:id/reply` `{text}` | reply to the latest message, in-thread |
 
-## Learn More
+## Secrets (none in git)
 
-To learn more about Next.js, take a look at the following resources:
+- `.env.local` — `MYEMAIL_API_TOKEN` (server).
+- `mobile/.env` — `API_BASE_URL`, `API_TOKEN` (same value; baked into the APK).
+- `/etc/automatelinux/myemail-google-client.json` — Google OAuth **Desktop** client
+  (currently the `panelshed-ads-api` project's client).
+- `/etc/automatelinux/myemail-google-token.json` — the refresh token (mode 600).
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Connecting Gmail
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. In Google Cloud, project `panelshed-ads-api`: **enable the Gmail API**
+   (APIs & Services → Library → Gmail API → Enable). Keep the OAuth consent
+   screen in **In production** — in *Testing*, Google expires the sign-in every 7 days.
+2. On the desktop: `node scripts/connect-google.mjs` — signs in through the browser
+   and writes the token file. Google shows an "unverified app" warning once:
+   Advanced → continue.

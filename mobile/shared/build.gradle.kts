@@ -29,7 +29,15 @@ kotlin {
             implementation(compose.materialIconsExtended)
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.kotlinx.datetime)
+            // Explicit: `implementation` hides compose.runtime's own coroutines
+            // from the compile classpath, so Dispatchers would not resolve.
+            implementation(libs.kotlinx.coroutines.core)
             implementation(libs.multiplatform.settings)
+        }
+
+        androidMain.dependencies {
+            // BackHandler — the system back gesture closes a thread / composer.
+            implementation(libs.activity.compose)
         }
     }
 }

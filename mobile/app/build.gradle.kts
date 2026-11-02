@@ -19,7 +19,10 @@ val gitShortHash = providers.exec {
 val envFile = rootProject.file(".env")
 val envProps = Properties()
 if (envFile.exists()) envFile.inputStream().use { envProps.load(it) }
-val apiBaseUrl = envProps.getProperty("API_BASE_URL", "http://10.7.0.1:3187/")
+val apiBaseUrl = envProps.getProperty("API_BASE_URL", "http://10.7.0.2:3187/")
+// The backend refuses every unauthenticated call. Empty stays buildable on
+// purpose: the app then says "no token in this build" instead of failing gradle.
+val apiToken = envProps.getProperty("API_TOKEN", "")
 
 android {
     namespace = "com.automatelinux.myEmail"
@@ -32,6 +35,7 @@ android {
         versionCode = gitCommitCount
         versionName = "v${gitCommitCount} (${gitShortHash})"
         buildConfigField("String", "API_BASE_URL", "\"$apiBaseUrl\"")
+        buildConfigField("String", "API_TOKEN", "\"$apiToken\"")
     }
 
     buildTypes {
