@@ -3,10 +3,7 @@ package com.automatelinux.myEmail.data
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class Unread(val people: Int = 0, val other: Int = 0)
-
-@Serializable
-data class StatusResponse(val ok: Boolean = false, val error: String? = null, val email: String = "", val unread: Unread = Unread())
+data class StatusResponse(val ok: Boolean = false, val error: String? = null, val email: String = "", val unread: Int = 0)
 
 @Serializable
 data class ThreadSummary(
@@ -49,5 +46,3 @@ data class ThreadResponse(val ok: Boolean = false, val error: String? = null, va
 
 @Serializable
 data class OkResponse(val ok: Boolean = false, val error: String? = null, val to: String? = null)
-
-enum class View(val key: String) { People("people"), Other("other") }

@@ -1,12 +1,7 @@
 import { guarded } from "@/lib/respond";
-import { GmailError, isView, listInbox } from "@/lib/gmail";
+import { listInbox } from "@/lib/gmail";
 
-/** GET /api/inbox?view=people|other[&pageToken=…] */
+/** GET /api/inbox[?pageToken=…] — the inbox, 25 conversations per page. */
 export async function GET(request: Request) {
-  return guarded(request, async () => {
-    const qs = new URL(request.url).searchParams;
-    const view = qs.get("view") ?? "people";
-    if (!isView(view)) throw new GmailError(`unknown view '${view}' (people|other)`, 400);
-    return listInbox(view, qs.get("pageToken") ?? undefined);
-  });
+  return guarded(request, async () => listInbox(new URL(request.url).searchParams.get("pageToken") ?? undefined));
 }

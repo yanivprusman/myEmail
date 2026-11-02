@@ -6,9 +6,6 @@ desktop) talks to Gmail; the **phone app** (`mobile/`, KMP/Compose, launcher nam
 
 What it does differently from the Gmail app:
 
-- **Two views, not one feed.** *People* (Gmail's Primary) and *Everything else*
-  (Promotions/Social/Updates/Forums), each with its own unread count. Bulk mail
-  never competes with a person for your attention.
 - **Text, not remote HTML.** Mail is shown as text: no tracking pixels load on open,
   nothing reflows, and each Hebrew/English paragraph takes its own direction.
 - **Quoted history folded away** ("On … wrote:", "בתאריך … כתב:").
@@ -19,8 +16,8 @@ What it does differently from the Gmail app:
 
 | Route | |
 |---|---|
-| `GET /api/status` | connected address + unread counts per view |
-| `GET /api/inbox?view=people\|other[&pageToken=]` | 25 threads per page |
+| `GET /api/status` | connected address + unread conversation count |
+| `GET /api/inbox[?pageToken=]` | the inbox, 25 threads per page |
 | `GET /api/thread/:id` | the conversation as text (does not mark read) |
 | `POST /api/thread/:id` `{action}` | `archive` `inbox` `read` `unread` `trash` `untrash` |
 | `POST /api/thread/:id/reply` `{text}` | reply to the latest message, in-thread |

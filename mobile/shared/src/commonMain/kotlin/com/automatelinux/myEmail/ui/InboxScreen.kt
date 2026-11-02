@@ -1,10 +1,5 @@
 package com.automatelinux.myEmail.ui
 
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -58,8 +53,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.automatelinux.myEmail.ListState
 import com.automatelinux.myEmail.data.ThreadSummary
-import com.automatelinux.myEmail.data.Unread
-import com.automatelinux.myEmail.data.View
 import com.automatelinux.myEmail.ui.theme.Ink
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -67,12 +60,10 @@ import com.automatelinux.myEmail.ui.theme.Ink
 fun InboxScreen(
     account: String,
     statusError: String?,
-    view: View,
-    unread: Unread,
+    unread: Int,
     state: ListState,
     listState: LazyListState,
     snackbar: SnackbarHostState,
-    onView: (View) -> Unit,
     onRefresh: () -> Unit,
     onLoadMore: () -> Unit,
     onOpen: (String) -> Unit,
@@ -81,7 +72,7 @@ fun InboxScreen(
     Scaffold(
         containerColor = Ink.Paper,
         contentWindowInsets = WindowInsets(0),
-        topBar = { Header(account, view, unread, onView) },
+        topBar = { Header(account, unread) },
         snackbarHost = { SnackbarHost(snackbar, Modifier.navigationBarsPadding()) { InkSnackbar(it) } },
     ) { pad ->
         PullToRefreshBox(
@@ -89,69 +80,50 @@ fun InboxScreen(
             onRefresh = onRefresh,
             modifier = Modifier.fillMaxSize().padding(pad),
         ) {
-            AnimatedContent(
-                targetState = view,
-                transitionSpec = { fadeIn(tween(220)) togetherWith fadeOut(tween(120)) },
-                label = "view",
-            ) { _ ->
-                val error = state.error ?: statusError
-                when {
-                    !state.loaded -> LazyColumn(Modifier.fillMaxSize()) { item { SkeletonRows() } }
-                    error != null && state.threads.isEmpty() -> LazyColumn(Modifier.fillMaxSize()) { item { Problem(error, onRefresh) } }
-                    state.threads.isEmpty() -> LazyColumn(Modifier.fillMaxSize()) {
-                        item {
-                            if (view == View.People) EmptyEnvelope("All caught up", "Nothing from people is waiting.\nPull down to check again.")
-                            else EmptyEnvelope("Nothing in bulk", "No newsletters, offers or notifications\nin your inbox.")
-                        }
-                    }
-                    else -> ThreadList(state, listState, onLoadMore, onOpen, onArchive)
+            val error = state.error ?: statusError
+            when {
+                !state.loaded -> LazyColumn(Modifier.fillMaxSize()) { item { SkeletonRows() } }
+                error != null && state.threads.isEmpty() -> LazyColumn(Modifier.fillMaxSize()) { item { Problem(error, onRefresh) } }
+                state.threads.isEmpty() -> LazyColumn(Modifier.fillMaxSize()) {
+                    item { EmptyEnvelope("All caught up", "Your inbox is empty.\nPull down to check again.") }
                 }
+                else -> ThreadList(state, listState, onLoadMore, onOpen, onArchive)
             }
         }
     }
 }
 
-/** Ink header in the icon's own night: date, the view's name, the switch. */
+/** Ink header in the icon's own night: date, "Inbox", how much is unread. */
 @Composable
-private fun Header(account: String, view: View, unread: Unread, onView: (View) -> Unit) {
-    Column(
+private fun Header(account: String, unread: Int) {
+    Row(
         Modifier.fillMaxWidth()
             .clip(RoundedCornerShape(bottomStart = 28.dp, bottomEnd = 28.dp))
             .background(Ink.NightBrush)
             .statusBarsPadding()
-            .padding(start = 22.dp, end = 22.dp, top = 14.dp, bottom = 18.dp),
+            .padding(start = 22.dp, end = 22.dp, top = 14.dp, bottom = 22.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Column(Modifier.weight(1f)) {
-                Text(todayLine().uppercase(), style = MaterialTheme.typography.labelSmall, color = Ink.SealGlow.copy(alpha = 0.85f))
-                Spacer(Modifier.height(4.dp))
-                val waiting = if (view == View.People) unread.people else unread.other
-                Text(
-                    if (view == View.People) "People" else "Everything else",
-                    style = MaterialTheme.typography.displaySmall, color = Color.White,
-                )
+        Column(Modifier.weight(1f)) {
+            Text(todayLine().uppercase(), style = MaterialTheme.typography.labelSmall, color = Ink.SealGlow.copy(alpha = 0.85f))
+            Spacer(Modifier.height(4.dp))
+            Text("Inbox", style = MaterialTheme.typography.displaySmall, color = Color.White)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                if (unread > 0) { SealDot(8.dp); Spacer(Modifier.width(7.dp)) }
                 Text(
                     when {
                         account.isEmpty() -> "Connecting…"
-                        waiting == 0 -> "Nothing unread"
-                        waiting == 1 -> "1 unread"
-                        else -> "$waiting unread"
+                        unread == 0 -> "Nothing unread"
+                        else -> "$unread unread"
                     },
                     style = MaterialTheme.typography.bodyMedium, color = Color.White.copy(alpha = 0.62f),
                 )
             }
-            if (account.isNotEmpty()) Box(
-                Modifier.size(40.dp).background(Ink.SealBrush, CircleShape),
-                contentAlignment = Alignment.Center,
-            ) { Text(initial(account), color = Ink.Night, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium) }
         }
-        Spacer(Modifier.height(18.dp))
-        SegmentSwitch(
-            labels = listOf("People" to unread.people, "Everything else" to unread.other),
-            selected = view.ordinal,
-            tags = listOf("tab-people", "tab-other"),
-            onSelect = { onView(View.entries[it]) },
-        )
+        if (account.isNotEmpty()) Box(
+            Modifier.size(40.dp).background(Ink.SealBrush, CircleShape),
+            contentAlignment = Alignment.Center,
+        ) { Text(initial(account), color = Ink.Night, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium) }
     }
 }
 

@@ -128,20 +128,6 @@ export async function myAddress(): Promise<string> {
 
 // ---------------------------------------------------------------- inbox
 
-/**
- * Two views, split by Gmail's own categories rather than a guess of ours:
- *  - people: Primary — mail a person wrote to you
- *  - other:  Promotions / Social / Updates / Forums — everything sent in bulk
- * Doing it with a query (not a filter over a page) keeps paging honest: a page
- * of "people" is 25 people-threads, not 25 threads of which three survive.
- */
-const QUERIES = {
-  people: "in:inbox -category:promotions -category:social -category:updates -category:forums",
-  other: "in:inbox (category:promotions OR category:social OR category:updates OR category:forums)",
-} as const;
-export type View = keyof typeof QUERIES;
-export const isView = (v: string): v is View => v in QUERIES;
-
 export type ThreadSummary = {
   id: string;
   from: string;
@@ -153,8 +139,9 @@ export type ThreadSummary = {
   count: number;
 };
 
-export async function listInbox(view: View, pageToken?: string) {
-  const qs = new URLSearchParams({ q: QUERIES[view], maxResults: "25" });
+/** The inbox as Gmail has it — one list, newest first, no re-sorting of ours. */
+export async function listInbox(pageToken?: string) {
+  const qs = new URLSearchParams({ labelIds: "INBOX", maxResults: "25" });
   if (pageToken) qs.set("pageToken", pageToken);
   const list = await gmail<{ threads?: { id: string }[]; nextPageToken?: string; resultSizeEstimate?: number }>(
     `/threads?${qs}`,
@@ -185,16 +172,9 @@ export async function listInbox(view: View, pageToken?: string) {
   return { threads: summaries, nextPageToken: list.nextPageToken ?? null };
 }
 
-/** Unread thread counts per view — what the tabs show. */
-export async function unreadCounts() {
-  const count = async (view: View) =>
-    (
-      await gmail<{ threads?: unknown[]; resultSizeEstimate?: number }>(
-        `/threads?${new URLSearchParams({ q: `${QUERIES[view]} is:unread`, maxResults: "100" })}`,
-      )
-    ).threads?.length ?? 0;
-  const [people, other] = await Promise.all([count("people"), count("other")]);
-  return { people, other };
+/** Unread conversations in the inbox — Gmail's own exact counter, one call. */
+export async function unreadCount(): Promise<number> {
+  return (await gmail<{ threadsUnread?: number }>("/labels/INBOX")).threadsUnread ?? 0;
 }
 
 // ---------------------------------------------------------------- one thread

@@ -23,9 +23,9 @@ class MailApi(baseUrl: String, private val token: String) {
 
     suspend fun status() = call("GET", "/api/status", null, StatusResponse.serializer()) { StatusResponse(error = it) }
 
-    suspend fun inbox(view: View, pageToken: String? = null): InboxResponse {
-        val page = pageToken?.let { "&pageToken=$it" } ?: ""
-        return call("GET", "/api/inbox?view=${view.key}$page", null, InboxResponse.serializer()) { InboxResponse(error = it) }
+    suspend fun inbox(pageToken: String? = null): InboxResponse {
+        val page = pageToken?.let { "?pageToken=$it" } ?: ""
+        return call("GET", "/api/inbox$page", null, InboxResponse.serializer()) { InboxResponse(error = it) }
     }
 
     suspend fun thread(id: String) = call("GET", "/api/thread/$id", null, ThreadResponse.serializer()) { ThreadResponse(error = it) }

@@ -69,46 +69,6 @@ fun Avatar(name: String, key: String, size: Dp = 42.dp) {
     }
 }
 
-/**
- * People / Everything else — a capsule whose thumb slides between the two,
- * drawn in the header's own material rather than a Material TabRow.
- */
-@Composable
-fun SegmentSwitch(labels: List<Pair<String, Int>>, selected: Int, tags: List<String>, onSelect: (Int) -> Unit) {
-    BoxWithConstraints(
-        Modifier.fillMaxWidth().height(46.dp).clip(RoundedCornerShape(23.dp)).background(Color.White.copy(alpha = 0.09f)).padding(4.dp),
-    ) {
-        val w = maxWidth / labels.size
-        val x by animateDpAsState(w * selected, tween(320, easing = FastOutSlowInEasing), label = "thumb")
-        Box(Modifier.offset(x = x).width(w).fillMaxHeight().shadow(6.dp, RoundedCornerShape(19.dp)).background(Ink.Cream, RoundedCornerShape(19.dp)))
-        Row(Modifier.fillMaxWidth().fillMaxHeight()) {
-            labels.forEachIndexed { i, (label, count) ->
-                val on = i == selected
-                Row(
-                    Modifier.weight(1f).fillMaxHeight().clip(RoundedCornerShape(19.dp))
-                        .clickable(remember { MutableInteractionSource() }, indication = null) { onSelect(i) }
-                        .testTag(tags[i]),
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text(label, style = MaterialTheme.typography.labelLarge, color = if (on) Ink.Text else Color.White.copy(alpha = 0.78f),
-                        fontWeight = if (on) FontWeight.Bold else FontWeight.Medium)
-                    if (count > 0) {
-                        Spacer(Modifier.width(7.dp))
-                        Box(
-                            Modifier.background(if (on) Ink.SealBrush else Brush.linearGradient(listOf(Color.White.copy(0.18f), Color.White.copy(0.18f))), RoundedCornerShape(9.dp))
-                                .padding(horizontal = 7.dp, vertical = 1.dp),
-                        ) {
-                            Text(if (count > 99) "99+" else "$count", style = MaterialTheme.typography.labelMedium,
-                                color = if (on) Ink.Night else Color.White, fontWeight = FontWeight.Bold)
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
 /** Snackbar in the header's ink, with the action in amber. */
 @Composable
 fun InkSnackbar(data: SnackbarData) {
