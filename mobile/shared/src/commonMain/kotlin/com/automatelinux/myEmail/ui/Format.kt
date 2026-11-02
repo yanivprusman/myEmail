@@ -36,3 +36,27 @@ fun avatarColor(key: String): Color = avatarColors[(key.lowercase().hashCode() a
 
 fun initial(name: String): String =
     name.trim().trimStart('"', '\'').firstOrNull { it.isLetterOrDigit() }?.uppercase() ?: "?"
+
+private val months = listOf("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December")
+private val weekdays = listOf("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
+
+/** Section a list by when it arrived: Today · Yesterday · This week · October · March 2025. */
+fun dayBucket(ms: Long): String {
+    val tz = TimeZone.currentSystemDefault()
+    val d = Instant.fromEpochMilliseconds(ms).toLocalDateTime(tz).date
+    val today = Clock.System.now().toLocalDateTime(tz).date
+    val days = today.toEpochDays() - d.toEpochDays()
+    return when {
+        days <= 0 -> "Today"
+        days == 1 -> "Yesterday"
+        days < 7 -> "This week"
+        d.year == today.year -> months[d.monthNumber - 1]
+        else -> "${months[d.monthNumber - 1]} ${d.year}"
+    }
+}
+
+/** "Monday, 2 November" — the header's quiet line. */
+fun todayLine(): String {
+    val d = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
+    return "${weekdays[d.dayOfWeek.ordinal]}, ${d.dayOfMonth} ${months[d.monthNumber - 1]}"
+}

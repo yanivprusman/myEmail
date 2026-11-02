@@ -1,6 +1,15 @@
 package com.automatelinux.myEmail
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
@@ -16,6 +25,7 @@ import com.automatelinux.myEmail.data.ThreadSummary
 import com.automatelinux.myEmail.data.Unread
 import com.automatelinux.myEmail.data.View
 import com.automatelinux.myEmail.platform.PlatformBackHandler
+import com.automatelinux.myEmail.platform.StatusBarIcons
 import com.automatelinux.myEmail.ui.InboxScreen
 import com.automatelinux.myEmail.ui.ThreadScreen
 import com.automatelinux.myEmail.ui.theme.AppTheme
@@ -38,7 +48,7 @@ data class ListState(
  * confirmation on every one of them is a tax; an undo on the rare mistake isn't.
  */
 @Composable
-fun App(baseUrl: String, token: String) {
+fun App(baseUrl: String, token: String, fonts: FontFamily = FontFamily.Default) {
     val api = remember(baseUrl, token) { MailApi(baseUrl, token) }
     val scope = rememberCoroutineScope()
     val snackbar = remember { SnackbarHostState() }
@@ -49,6 +59,8 @@ fun App(baseUrl: String, token: String) {
     var account by remember { mutableStateOf("") }
     var statusError by remember { mutableStateOf<String?>(null) }
     var openId by remember { mutableStateOf<String?>(null) }
+    // Hoisted so coming back from a thread lands exactly where you left the list.
+    val listStates = remember { View.entries.associateWith { LazyListState() } }
 
     fun refreshStatus() = scope.launch {
         val s = api.status()
@@ -118,9 +130,18 @@ fun App(baseUrl: String, token: String) {
     LaunchedEffect(Unit) { refresh(View.People) }
     LaunchedEffect(view) { if (!lists.getValue(view).loaded) load(view) }
     PlatformBackHandler(enabled = openId != null) { openId = null }
+    StatusBarIcons(light = openId == null)
 
-    AppTheme {
-        val id = openId
+    AppTheme(fonts) {
+      AnimatedContent(
+        targetState = openId,
+        transitionSpec = {
+            val opening = targetState != null
+            (slideInHorizontally(tween(260)) { if (opening) it / 4 else -it / 4 } + fadeIn(tween(260))) togetherWith
+                (slideOutHorizontally(tween(200)) { if (opening) -it / 8 else it / 8 } + fadeOut(tween(160)))
+        },
+        label = "screen",
+      ) { id ->
         if (id == null) {
             InboxScreen(
                 account = account,
@@ -128,6 +149,7 @@ fun App(baseUrl: String, token: String) {
                 view = view,
                 unread = unread,
                 state = lists.getValue(view),
+                listState = listStates.getValue(view),
                 snackbar = snackbar,
                 onView = { view = it },
                 onRefresh = { refresh() },
@@ -153,5 +175,6 @@ fun App(baseUrl: String, token: String) {
                 onReplied = { load(locate(id)?.first ?: view) },
             )
         }
+      }
     }
 }

@@ -1,5 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A cream envelope closed with an amber wax seal bearing a person:
+     mail from people, first. The seal is the app's signature mark. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="108dp" android:height="108dp" android:viewportWidth="108" android:viewportHeight="108">
-    <path android:fillColor="#FFFFFF" android:pathData="M38,38 h32 a6,6 0 0 1 6,6 v20 a6,6 0 0 1 -6,6 h-32 a6,6 0 0 1 -6,-6 v-20 a6,6 0 0 1 6,-6 z" />
-    <path android:fillColor="#B2DFDB" android:pathData="M46,48 h16 v4 h-16 z M46,56 h16 v4 h-16 z" />
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="108dp" android:height="108dp"
+    android:viewportWidth="108" android:viewportHeight="108">
+    <group android:pivotX="54" android:pivotY="57" android:scaleX="1.22" android:scaleY="1.22">
+        <path android:pathData="M29,77a25,3.2 0,1 0,50 0a25,3.2 0,1 0,-50 0z" android:fillColor="#59000000" />
+        <path android:pathData="M31,38h46a4,4 0,0 1,4 4v28a4,4 0,0 1,-4 4h-46a4,4 0,0 1,-4 -4v-28a4,4 0,0 1,4 -4z">
+            <aapt:attr name="android:fillColor">
+                <gradient android:type="linear" android:startX="54" android:startY="38" android:endX="54" android:endY="74">
+                    <item android:offset="0" android:color="#FFFFFDF8" />
+                    <item android:offset="1" android:color="#FFE6DFCF" />
+                </gradient>
+            </aapt:attr>
+        </path>
+        <path android:pathData="M28.5,72.5L49,56M79.5,72.5L59,56" android:strokeColor="#FFCFC5B0"
+            android:strokeWidth="1.2" android:strokeLineCap="round" />
+        <path android:pathData="M28,40.5Q28,38 31,38h46q3,0 3,2.5L57.2,58.6q-3.2,2.6 -6.4,0z">
+            <aapt:attr name="android:fillColor">
+                <gradient android:type="linear" android:startX="54" android:startY="38" android:endX="54" android:endY="60">
+                    <item android:offset="0" android:color="#FFEFE8D9" />
+                    <item android:offset="1" android:color="#FFD8CFBC" />
+                </gradient>
+            </aapt:attr>
+        </path>
+        <path android:pathData="M28,40.5L50.8,58.6q3.2,2.6 6.4,0L80,40.5" android:strokeColor="#CCC7BCA5" android:strokeWidth="0.8" />
+        <path android:pathData="M46,60.5a8.6,8.6 0,1 0,17.2 0a8.6,8.6 0,1 0,-17.2 0z" android:fillColor="#597A3F0C" />
+        <path android:pathData="M45.4,59.5a8.6,8.6 0,1 0,17.2 0a8.6,8.6 0,1 0,-17.2 0z">
+            <aapt:attr name="android:fillColor">
+                <gradient android:type="radial" android:centerX="51.5" android:centerY="55.5" android:gradientRadius="13">
+                    <item android:offset="0" android:color="#FFFFCB6B" />
+                    <item android:offset="0.6" android:color="#FFE39A2E" />
+                    <item android:offset="1" android:color="#FFB8661A" />
+                </gradient>
+            </aapt:attr>
+        </path>
+        <path android:pathData="M48.4,59.5a5.6,5.6 0,1 0,11.2 0a5.6,5.6 0,1 0,-11.2 0z" android:strokeColor="#B3FFE2A8" android:strokeWidth="0.9" />
+        <path android:pathData="M52.3,57.6a1.7,1.7 0,1 0,3.4 0a1.7,1.7 0,1 0,-3.4 0z" android:fillColor="#D99A5414" />
+        <path android:pathData="M50.9,62.6q3.1,-3.4 6.2,0" android:strokeColor="#D99A5414" android:strokeWidth="1.5" android:strokeLineCap="round" />
+    </group>
 </vector>
